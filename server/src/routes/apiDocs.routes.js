@@ -1,0 +1,210 @@
+import express from 'express';
+
+const router = express.Router();
+
+router.get('/', (req, res) => {
+  res.json({
+    success: true,
+    message: 'SaaS CRM API Documentation',
+    version: '1.0.0',
+    baseUrl: '/api',
+    authentication: {
+      type: 'Bearer Token',
+      header: 'Authorization: Bearer <token>',
+      login: 'POST /api/auth/login',
+      register: 'POST /api/auth/register',
+      refresh: 'POST /api/auth/refresh-token',
+      logout: 'POST /api/auth/logout',
+    },
+    endpoints: {
+      auth: {
+        base: '/api/auth',
+        routes: {
+          'POST /register': 'Register new workspace',
+          'POST /login': 'Login user',
+          'POST /refresh-token': 'Refresh access token',
+          'POST /logout': 'Logout user',
+          'POST /logout-all': 'Logout from all devices',
+          'GET /me': 'Get current user',
+          'POST /forgot-password': 'Request password reset',
+          'POST /reset-password/:token': 'Reset password',
+          'GET /verify-email/:token': 'Verify email',
+          'POST /resend-verification': 'Resend verification email',
+          'PUT /update-password': 'Update password',
+          'GET /sessions': 'Get active sessions',
+        },
+      },
+      workspaces: {
+        base: '/api/workspaces',
+        routes: {
+          'GET /': 'Get current workspace',
+          'POST /create': 'Create new workspace',
+          'PUT /': 'Update workspace',
+          'GET /members': 'Get workspace members',
+          'POST /invite': 'Invite team member',
+          'POST /join/:token': 'Accept invitation',
+          'DELETE /members/:userId': 'Remove member',
+          'PUT /members/:userId/role': 'Update member role',
+          'GET /stats': 'Get workspace stats',
+          'GET /subscription': 'Get subscription info',
+        },
+      },
+      clients: {
+        base: '/api/clients',
+        routes: {
+          'GET /': 'List clients (with search, filter, pagination)',
+          'POST /': 'Create client',
+          'GET /:id': 'Get client details',
+          'PUT /:id': 'Update client',
+          'DELETE /:id': 'Delete client',
+          'POST /:id/contacts': 'Add contact',
+          'POST /:id/notes': 'Add note',
+        },
+        queryParams: {
+          search: 'Search in name, email, industry',
+          status: 'Filter by status (active, inactive, lead, prospect, churned)',
+          'company.industry': 'Filter by industry',
+          sort: 'Sort field (prefix with - for descending)',
+          page: 'Page number (default: 1)',
+          limit: 'Items per page (default: 10, max: 100)',
+          fields: 'Select specific fields (comma-separated)',
+          startDate: 'Filter by created date (ISO format)',
+          endDate: 'Filter by created date (ISO format)',
+        },
+      },
+      projects: {
+        base: '/api/projects',
+        routes: {
+          'GET /': 'List projects',
+          'POST /': 'Create project',
+          'GET /:id': 'Get project details',
+          'PUT /:id': 'Update project',
+          'DELETE /:id': 'Archive project',
+          'POST /:id/milestones': 'Add milestone',
+          'PUT /:id/milestones/:milestoneId': 'Update milestone',
+          'POST /:id/team': 'Add team member',
+          'DELETE /:id/team/:userId': 'Remove team member',
+        },
+      },
+      tasks: {
+        base: '/api/tasks',
+        routes: {
+          'GET /': 'List tasks (with Kanban support)',
+          'POST /': 'Create task',
+          'GET /:id': 'Get task details',
+          'PUT /:id': 'Update task',
+          'DELETE /:id': 'Delete task',
+          'PUT /:id/board': 'Update Kanban position',
+          'POST /:id/comments': 'Add comment',
+          'POST /:id/checklist': 'Add checklist item',
+          'PUT /:id/checklist/:itemId': 'Toggle checklist',
+          'POST /:id/time': 'Log time',
+          'POST /:id/attachments': 'Add attachment',
+        },
+      },
+      invoices: {
+        base: '/api/invoices',
+        routes: {
+          'GET /': 'List invoices',
+          'POST /': 'Create invoice',
+          'GET /:id': 'Get invoice details',
+          'PUT /:id': 'Update invoice',
+          'DELETE /:id': 'Cancel invoice',
+          'POST /:id/send': 'Send invoice',
+          'POST /:id/payments': 'Record payment',
+        },
+      },
+      reports: {
+        base: '/api/reports',
+        routes: {
+          'GET /dashboard': 'Get dashboard statistics',
+          'GET /revenue': 'Get revenue report',
+          'GET /employee-performance': 'Get employee performance',
+          'GET /project-progress': 'Get project progress',
+          'GET /task-completion': 'Get task completion',
+          'GET /client-stats': 'Get client statistics',
+          'POST /export': 'Export report (CSV/PDF/JSON)',
+        },
+      },
+      employees: {
+        base: '/api/employees',
+        routes: {
+          'GET /': 'List employees',
+          'POST /': 'Create employee',
+          'GET /:id': 'Get employee details',
+          'PUT /:id': 'Update employee',
+          'DELETE /:id': 'Terminate employee',
+          'PUT /:id/attendance': 'Update attendance',
+          'GET /departments': 'List departments',
+          'POST /departments': 'Create department',
+        },
+      },
+      permissions: {
+        base: '/api/permissions',
+        routes: {
+          'GET /': 'Get all permissions',
+          'GET /roles': 'Get all roles',
+          'GET /assignable-roles': 'Get assignable roles',
+          'GET /users/:userId': 'Get user permissions',
+          'PUT /users/:userId': 'Update user permissions',
+        },
+      },
+      notifications: {
+        base: '/api/notifications',
+        routes: {
+          'GET /': 'Get notifications',
+          'GET /unread-count': 'Get unread count',
+          'POST /': 'Create notification',
+          'PUT /read-all': 'Mark all as read',
+          'PUT /:id/read': 'Mark as read',
+          'PUT /:id/archive': 'Archive notification',
+        },
+      },
+      upload: {
+        base: '/api/upload',
+        routes: {
+          'POST /': 'Upload single file',
+          'POST /multiple': 'Upload multiple files',
+          'DELETE /:publicId': 'Delete file',
+          'GET /:publicId/info': 'Get file info',
+        },
+      },
+    },
+    responseFormat: {
+      success: {
+        success: true,
+        message: 'Success message',
+        data: {},
+        meta: {
+          pagination: {
+            page: 1,
+            limit: 10,
+            total: 100,
+            totalPages: 10,
+            hasNext: true,
+            hasPrev: false,
+          },
+        },
+      },
+      error: {
+        success: false,
+        message: 'Error message',
+        statusCode: 400,
+        errors: [{ field: 'email', message: 'Invalid email' }],
+      },
+    },
+    httpStatusCodes: {
+      200: 'OK - Successful request',
+      201: 'Created - Resource created',
+      400: 'Bad Request - Invalid input',
+      401: 'Unauthorized - Authentication required',
+      403: 'Forbidden - Insufficient permissions',
+      404: 'Not Found - Resource not found',
+      422: 'Unprocessable Entity - Validation error',
+      429: 'Too Many Requests - Rate limit exceeded',
+      500: 'Internal Server Error',
+    },
+  });
+});
+
+export default router;
