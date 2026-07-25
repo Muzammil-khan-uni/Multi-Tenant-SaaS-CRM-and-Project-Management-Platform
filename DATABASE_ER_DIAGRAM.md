@@ -55,7 +55,7 @@ erDiagram
         string plan "free|starter|professional|enterprise"
         string subscription_status "trial|active|past_due|cancelled"
         ObjectId owner FK
-        ObjectId[] admins FK
+        ObjectId_array admins FK
         boolean isActive
     }
 
@@ -66,7 +66,7 @@ erDiagram
         string firstName
         string lastName
         boolean isSuperAdmin
-        Membership[] workspaceMemberships "embedded"
+        Membership_array workspaceMemberships "embedded"
         boolean isActive
         boolean isEmailVerified
     }
@@ -76,12 +76,12 @@ erDiagram
         ObjectId workspace FK
         string company_name
         string status "active|lead|prospect|churned|on_hold"
-        Contact[] contacts "embedded"
-        Note[] notes "embedded"
+        Contact_array contacts "embedded"
+        Note_array notes "embedded"
         ObjectId assignedTo FK
         ObjectId accountManager FK
-        ObjectId[] projects FK
-        ObjectId[] invoices FK
+        ObjectId_array projects FK
+        ObjectId_array invoices FK
         number totalRevenue
     }
 
@@ -92,9 +92,9 @@ erDiagram
         string name
         string status "planning|active|on_hold|completed|cancelled"
         string type "fixed_price|hourly|retainer|internal"
-        TeamMember[] team "embedded, refs USER"
-        Milestone[] milestones "embedded"
-        ObjectId[] tasks FK
+        TeamMember_array team "embedded, refs USER"
+        Milestone_array milestones "embedded"
+        ObjectId_array tasks FK
         number progress "0-100"
     }
 
@@ -105,10 +105,10 @@ erDiagram
         string title
         string status "todo|in_progress|review|completed"
         string boardColumn "kanban position"
-        Assignee[] assignedTo "embedded, refs USER"
+        Assignee_array assignedTo "embedded, refs USER"
         ObjectId createdBy FK
-        Checklist[] checklist "embedded"
-        Comment[] comments "embedded, refs USER"
+        Checklist_array checklist "embedded"
+        Comment_array comments "embedded, refs USER"
         ObjectId parentTask FK "self-ref"
     }
 
@@ -119,8 +119,8 @@ erDiagram
         ObjectId project FK
         string number UK
         string status "draft|sent|paid|overdue|cancelled|refunded"
-        LineItem[] items "embedded"
-        Payment[] payments "embedded"
+        LineItem_array items "embedded"
+        Payment_array payments "embedded"
         number total
         number balanceDue
         ObjectId parentInvoice FK "self-ref, recurring"
@@ -159,12 +159,12 @@ erDiagram
     EMPLOYEE {
         ObjectId _id PK
         ObjectId workspace FK
-        ObjectId user FK UK "1:1 with User"
+        ObjectId user FK "unique, 1:1 with User"
         string employeeId UK
         string status "active|on_leave|terminated"
         string employmentType
         LeaveRecord currentLeave "embedded"
-        LeaveRecord[] leaveHistory "embedded"
+        LeaveRecord_array leaveHistory "embedded"
     }
 
     DEPARTMENT {
@@ -174,7 +174,7 @@ erDiagram
         string code
         ObjectId manager FK
         ObjectId parentDepartment FK "self-ref"
-        ObjectId[] employees FK
+        ObjectId_array employees FK
     }
 
     NOTIFICATION {
@@ -194,7 +194,7 @@ erDiagram
         ObjectId sender FK
         string message
         ObjectId replyTo FK "self-ref"
-        Reaction[] reactions "embedded, refs USER"
+        Reaction_array reactions "embedded, refs USER"
         date createdAt "TTL 90d"
     }
 
@@ -213,7 +213,7 @@ erDiagram
         string title
         string targetAudience "all|admins|specific_plan"
         ObjectId sentBy FK
-        ReadReceipt[] readBy "embedded, refs USER + WORKSPACE"
+        ReadReceipt_array readBy "embedded, refs USER + WORKSPACE"
     }
 
     WORKSPACE ||--o{ EMPLOYEE      : employs
