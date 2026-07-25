@@ -1,0 +1,3902 @@
+{
+  "info": {
+    "_postman_id": "e3f1c2a4-9b7d-4f3e-8a1b-saascrm00001",
+    "name": "SaaSCRM API - Multi-Tenant SaaS CRM & Project Management Platform",
+    "description": "Postman collection for the SaaSCRM REST API - a full-stack, multi-tenant SaaS platform combining CRM, project management, invoicing, and team collaboration.\n\n## Setup\n1. Set `baseUrl` in the collection variables (defaults to `http://localhost:5000`).\n2. Run **Auth > Register Workspace**, then **Auth > Login** - the Login request's Tests script automatically stores `accessToken`, `refreshToken`, `workspaceSlug`, `workspaceId`, and `userId` as collection variables.\n3. Every other request inherits Bearer auth from the collection level using `{{accessToken}}`, and workspace-scoped requests send the `x-workspace-slug` header automatically using `{{workspaceSlug}}`.\n4. Replace `:id`-style path variables in individual requests with real IDs as you create resources (or capture them into collection variables via each request's Tests tab).\n\n## Conventions\n- All responses share a `{ success, message, data, meta? }` / `{ success, message, statusCode, errors? }` envelope.\n- Rate limits: global 500/15min, auth 20/15min, password reset 3/hour, general API 120/min, uploads 10/min.\n- See `API_DOCUMENTATION.md` in the repository for the full reference.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{accessToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5000",
+      "type": "string"
+    },
+    {
+      "key": "accessToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "refreshToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "workspaceSlug",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "workspaceId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "userId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "clientId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "projectId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "taskId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "invoiceId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "employeeId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "departmentId",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Collection-level pre-request script.",
+          "// Individual requests inherit Bearer auth automatically via {{accessToken}}."
+        ]
+      }
+    }
+  ],
+  "item": [
+    {
+      "name": "🔑 Auth",
+      "item": [
+        {
+          "name": "Register Workspace",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "register"]
+            },
+            "description": "Creates a brand-new workspace and its first user as company_admin. No auth required.",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"workspaceName\": \"Acme Inc\",\n  \"workspaceSlug\": \"acme-inc\",\n  \"firstName\": \"Jane\",\n  \"lastName\": \"Doe\",\n  \"email\": \"jane@acme.com\",\n  \"password\": \"S3cure!Pass\",\n  \"company\": \"Acme Inc\",\n  \"industry\": \"technology\",\n  \"size\": \"11-50\",\n  \"timezone\": \"UTC\",\n  \"currency\": \"USD\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "login"]
+            },
+            "description": "Authenticates and returns accessToken + refreshToken. Auto-saves tokens to collection variables via the Tests script.",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"jane@acme.com\",\n  \"password\": \"S3cure!Pass\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (pm.response.code === 200 && json?.data?.accessToken) {",
+                  "    pm.collectionVariables.set('accessToken', json.data.accessToken);",
+                  "    pm.collectionVariables.set('refreshToken', json.data.refreshToken);",
+                  "    if (json.data.user?.workspace?.slug) {",
+                  "        pm.collectionVariables.set('workspaceSlug', json.data.user.workspace.slug);",
+                  "    }",
+                  "    if (json.data.user?.workspace?.id) {",
+                  "        pm.collectionVariables.set('workspaceId', json.data.user.workspace.id);",
+                  "    }",
+                  "    if (json.data.user?.id) {",
+                  "        pm.collectionVariables.set('userId', json.data.user.id);",
+                  "    }",
+                  "    pm.test('Login succeeded and tokens stored', () => pm.expect(json.success).to.be.true);",
+                  "} else {",
+                  "    pm.test('Login response received', () => pm.expect(pm.response.code).to.be.oneOf([200, 401, 403, 423]));",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Select Workspace",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/select-workspace",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "select-workspace"]
+            },
+            "description": "Used when a login response returns multiple workspace options.",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"workspaceId\": \"{{workspaceId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Refresh Token",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/refresh-token",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "refresh-token"]
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (pm.response.code === 200 && json?.data?.accessToken) {",
+                  "    pm.collectionVariables.set('accessToken', json.data.accessToken);",
+                  "    pm.test('Access token refreshed', () => pm.expect(json.success).to.be.true);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Forgot Password",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/forgot-password",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "forgot-password"]
+            },
+            "description": "Rate-limited to 3 requests/hour.",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"jane@acme.com\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Reset Password",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/reset-password/:token",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "reset-password", ":token"]
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"password\": \"N3wSecure!Pass\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Verify Email",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/verify-email/:token",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "verify-email", ":token"]
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Resend Verification Email",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/resend-verification",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "resend-verification"]
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"jane@acme.com\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Check Email Availability",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/check-email?email=jane@acme.com",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "check-email"],
+              "query": [
+                {
+                  "key": "email",
+                  "value": "jane@acme.com",
+                  "disabled": true
+                }
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Check Workspace Slug",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/check-workspace-slug?slug=acme-inc",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "check-workspace-slug"],
+              "query": [
+                {
+                  "key": "slug",
+                  "value": "acme-inc",
+                  "disabled": true
+                }
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/logout",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "logout"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Logout All Devices",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/logout-all",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "logout-all"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Current User (Me)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "me"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Password",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/update-password",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "update-password"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"currentPassword\": \"S3cure!Pass\",\n  \"newPassword\": \"N3wSecure!Pass\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Active Sessions",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/sessions",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "sessions"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get My Workspaces",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/my-workspaces",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "my-workspaces"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Switch Workspace",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/switch-workspace",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "switch-workspace"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"workspaceId\": \"{{workspaceId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        }
+      ],
+      "description": "Registration, login, tokens, password reset, and email verification. Public endpoints are marked No Auth."
+    },
+    {
+      "name": "🏢 Workspaces",
+      "item": [
+        {
+          "name": "Preview Invitation",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/workspaces/join/:token",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "workspaces", "join", ":token"]
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Accept Invitation",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/workspaces/join/:token",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "workspaces", "join", ":token"]
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"John\",\n  \"lastName\": \"Smith\",\n  \"password\": \"S3cure!Pass\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Current Workspace",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/workspaces",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "workspaces"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Workspace",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/workspaces/create",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "workspaces", "create"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Second Workspace\",\n  \"industry\": \"consulting\",\n  \"size\": \"1-10\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Workspace",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/workspaces",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "workspaces"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Acme Incorporated\",\n  \"description\": \"Updated workspace description\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Workspace",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/workspaces",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "workspaces"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Workspace Settings",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/workspaces/settings",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "workspaces", "settings"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"timezone\": \"America/New_York\",\n  \"currency\": \"USD\",\n  \"dateFormat\": \"MM/DD/YYYY\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Branding",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/workspaces/branding",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "workspaces", "branding"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"primaryColor\": \"#2563eb\",\n  \"secondaryColor\": \"#8b5cf6\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Members",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/workspaces/members",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "workspaces", "members"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Invite Member",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/workspaces/invite",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "workspaces", "invite"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"newmember@acme.com\",\n  \"role\": \"employee\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Remove Member",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/workspaces/members/:userId",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "workspaces", "members", ":userId"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Member Role",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/workspaces/members/:userId/role",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "workspaces", "members", ":userId", "role"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"role\": \"project_manager\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Terminate Member",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/workspaces/members/:userId/terminate",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "workspaces", "members", ":userId", "terminate"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Reactivate Member",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/workspaces/members/:userId/reactivate",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "workspaces", "members", ":userId", "reactivate"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Transfer Ownership",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/workspaces/transfer-ownership",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "workspaces", "transfer-ownership"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"newOwnerId\": \"{{userId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Invitations",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/workspaces/invitations",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "workspaces", "invitations"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Cancel Invitation",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/workspaces/invitations/:invitationId",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "workspaces", "invitations", ":invitationId"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Resend Invitation",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/workspaces/invitations/:invitationId/resend",
+              "host": ["{{baseUrl}}"],
+              "path": [
+                "api",
+                "workspaces",
+                "invitations",
+                ":invitationId",
+                "resend"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Subscription",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/workspaces/subscription",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "workspaces", "subscription"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Workspace Stats",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/workspaces/stats",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "workspaces", "stats"]
+            }
+          },
+          "response": []
+        }
+      ],
+      "description": "Workspace CRUD, branding/settings, membership, invitations, and subscription info."
+    },
+    {
+      "name": "👤 Users",
+      "item": [
+        {
+          "name": "List Users",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-workspace-slug",
+                "value": "{{workspaceSlug}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/users?search=&page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "users"],
+              "query": [
+                {
+                  "key": "search",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "disabled": true
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "x-workspace-slug",
+                "value": "{{workspaceSlug}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/users",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "users"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Alex\",\n  \"lastName\": \"Rivera\",\n  \"email\": \"alex@acme.com\",\n  \"password\": \"S3cure!Pass\",\n  \"role\": \"employee\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get User By ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-workspace-slug",
+                "value": "{{workspaceSlug}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/users/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "users", ":id"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update User",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "x-workspace-slug",
+                "value": "{{workspaceSlug}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/users/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "users", ":id"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Alexandra\",\n  \"position\": \"Senior Developer\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete User",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "x-workspace-slug",
+                "value": "{{workspaceSlug}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/users/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "users", ":id"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update My Profile",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "x-workspace-slug",
+                "value": "{{workspaceSlug}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/users/profile/update",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "users", "profile", "update"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"bio\": \"Full-stack engineer.\",\n  \"phone\": \"+1-555-0100\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        }
+      ],
+      "description": "User management within the active workspace."
+    },
+    {
+      "name": "🧑‍🤝‍🧑 Clients (CRM)",
+      "item": [
+        {
+          "name": "List Clients",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-workspace-slug",
+                "value": "{{workspaceSlug}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/clients?search=acme&status=active&sort=-createdAt&page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "clients"],
+              "query": [
+                {
+                  "key": "search",
+                  "value": "acme",
+                  "disabled": true
+                },
+                {
+                  "key": "status",
+                  "value": "active",
+                  "disabled": true
+                },
+                {
+                  "key": "sort",
+                  "value": "-createdAt",
+                  "disabled": true
+                },
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "disabled": true
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Client",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "x-workspace-slug",
+                "value": "{{workspaceSlug}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/clients",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "clients"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"company\": {\n    \"name\": \"Globex Corp\",\n    \"industry\": \"manufacturing\"\n  },\n  \"status\": \"lead\",\n  \"source\": \"referral\",\n  \"type\": \"enterprise\",\n  \"contacts\": [\n    {\n      \"firstName\": \"Hank\",\n      \"lastName\": \"Scorpio\",\n      \"email\": \"hank@globex.com\",\n      \"isPrimary\": true,\n      \"isDecisionMaker\": true\n    }\n  ],\n  \"communicationPreferences\": {\n    \"email\": true,\n    \"phone\": true,\n    \"sms\": false\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Client By ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-workspace-slug",
+                "value": "{{workspaceSlug}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/clients/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "clients", ":id"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Client",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "x-workspace-slug",
+                "value": "{{workspaceSlug}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/clients/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "clients", ":id"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"active\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Client",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "x-workspace-slug",
+                "value": "{{workspaceSlug}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/clients/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "clients", ":id"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Add Contact",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "x-workspace-slug",
+                "value": "{{workspaceSlug}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/clients/:id/contacts",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "clients", ":id", "contacts"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Mindy\",\n  \"lastName\": \"Simmons\",\n  \"email\": \"mindy@globex.com\",\n  \"isPrimary\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Contact",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "x-workspace-slug",
+                "value": "{{workspaceSlug}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/clients/:id/contacts/:contactId",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "clients", ":id", "contacts", ":contactId"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"position\": \"VP of Operations\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Contact",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "x-workspace-slug",
+                "value": "{{workspaceSlug}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/clients/:id/contacts/:contactId",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "clients", ":id", "contacts", ":contactId"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Add Note",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "x-workspace-slug",
+                "value": "{{workspaceSlug}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/clients/:id/notes",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "clients", ":id", "notes"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content\": \"Had a great discovery call \\u2014 ready to move to proposal.\",\n  \"isPrivate\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Note",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "x-workspace-slug",
+                "value": "{{workspaceSlug}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/clients/:id/notes/:noteId",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "clients", ":id", "notes", ":noteId"]
+            }
+          },
+          "response": []
+        }
+      ],
+      "description": "Client (CRM) records, contacts, and notes. status enum: active|inactive|lead|prospect|churned|on_hold"
+    },
+    {
+      "name": "📁 Projects",
+      "item": [
+        {
+          "name": "List Projects",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-workspace-slug",
+                "value": "{{workspaceSlug}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/projects?status=active&sort=-createdAt&page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "projects"],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "active",
+                  "disabled": true
+                },
+                {
+                  "key": "sort",
+                  "value": "-createdAt",
+                  "disabled": true
+                },
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "disabled": true
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Project Stats",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-workspace-slug",
+                "value": "{{workspaceSlug}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/projects/stats",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "projects", "stats"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Project",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "x-workspace-slug",
+                "value": "{{workspaceSlug}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/projects",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "projects"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Website Redesign\",\n  \"description\": \"Full marketing site overhaul\",\n  \"client\": \"{{clientId}}\",\n  \"type\": \"fixed_price\",\n  \"status\": \"planning\",\n  \"priority\": \"high\",\n  \"budget\": {\n    \"estimated\": 15000,\n    \"currency\": \"USD\"\n  },\n  \"timeline\": {\n    \"deadline\": \"2026-10-01\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Project By ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-workspace-slug",
+                "value": "{{workspaceSlug}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/projects/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "projects", ":id"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Project",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "x-workspace-slug",
+                "value": "{{workspaceSlug}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/projects/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "projects", ":id"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"active\",\n  \"priority\": \"urgent\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Archive Project",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "x-workspace-slug",
+                "value": "{{workspaceSlug}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/projects/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "projects", ":id"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Add Team Member",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "x-workspace-slug",
+                "value": "{{workspaceSlug}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/projects/:id/team",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "projects", ":id", "team"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user\": \"{{userId}}\",\n  \"role\": \"Frontend Developer\",\n  \"hoursAllocated\": 80\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Remove Team Member",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "x-workspace-slug",
+                "value": "{{workspaceSlug}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/projects/:id/team/:userId",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "projects", ":id", "team", ":userId"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Add Milestone",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "x-workspace-slug",
+                "value": "{{workspaceSlug}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/projects/:id/milestones",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "projects", ":id", "milestones"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Design approval\",\n  \"description\": \"Client sign-off on final mockups\",\n  \"dueDate\": \"2026-08-15\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Milestone Status",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "x-workspace-slug",
+                "value": "{{workspaceSlug}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/projects/:id/milestones/:milestoneId",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "projects", ":id", "milestones", ":milestoneId"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"completed\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        }
+      ],
+      "description": "Project CRUD, team assignment, and milestones. status enum: planning|active|on_hold|completed|cancelled"
+    },
+    {
+      "name": "✅ Tasks",
+      "item": [
+        {
+          "name": "List Tasks",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-workspace-slug",
+                "value": "{{workspaceSlug}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/tasks?project={{projectId}}&status=todo&page=1&limit=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "tasks"],
+              "query": [
+                {
+                  "key": "project",
+                  "value": "{{projectId}}",
+                  "disabled": true
+                },
+                {
+                  "key": "status",
+                  "value": "todo",
+                  "disabled": true
+                },
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "disabled": true
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Task",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "x-workspace-slug",
+                "value": "{{workspaceSlug}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/tasks",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "tasks"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"project\": \"{{projectId}}\",\n  \"title\": \"Set up CI/CD pipeline\",\n  \"description\": \"Configure GitHub Actions for build + deploy\",\n  \"status\": \"todo\",\n  \"priority\": \"high\",\n  \"type\": \"task\",\n  \"dueDate\": \"2026-08-05\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Task By ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-workspace-slug",
+                "value": "{{workspaceSlug}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/tasks/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "tasks", ":id"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Task",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "x-workspace-slug",
+                "value": "{{workspaceSlug}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/tasks/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "tasks", ":id"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"in_progress\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Task",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "x-workspace-slug",
+                "value": "{{workspaceSlug}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/tasks/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "tasks", ":id"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Assign Task",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "x-workspace-slug",
+                "value": "{{workspaceSlug}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/tasks/:id/assign",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "tasks", ":id", "assign"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"{{userId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Kanban Board Position",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "x-workspace-slug",
+                "value": "{{workspaceSlug}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/tasks/:id/board",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "tasks", ":id", "board"]
+            },
+            "description": "Broadcasts a task:updated Socket.IO event to everyone viewing the project board.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"boardColumn\": \"in_progress\",\n  \"boardOrder\": 2\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Add Comment",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "x-workspace-slug",
+                "value": "{{workspaceSlug}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/tasks/:id/comments",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "tasks", ":id", "comments"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content\": \"Blocked on API credentials \\u2014 following up with DevOps.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Comment",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "x-workspace-slug",
+                "value": "{{workspaceSlug}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/tasks/:id/comments/:commentId",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "tasks", ":id", "comments", ":commentId"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Add Checklist Item",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "x-workspace-slug",
+                "value": "{{workspaceSlug}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/tasks/:id/checklist",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "tasks", ":id", "checklist"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Write unit tests\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Toggle Checklist Item",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "x-workspace-slug",
+                "value": "{{workspaceSlug}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/tasks/:id/checklist/:itemId",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "tasks", ":id", "checklist", ":itemId"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"completed\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Checklist Item",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "x-workspace-slug",
+                "value": "{{workspaceSlug}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/tasks/:id/checklist/:itemId",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "tasks", ":id", "checklist", ":itemId"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Add Attachment",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "x-workspace-slug",
+                "value": "{{workspaceSlug}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/tasks/:id/attachments",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "tasks", ":id", "attachments"]
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": ""
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Attachment",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "x-workspace-slug",
+                "value": "{{workspaceSlug}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/tasks/:id/attachments/:attachmentId",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "tasks", ":id", "attachments", ":attachmentId"]
+            }
+          },
+          "response": []
+        }
+      ],
+      "description": "Task CRUD, Kanban board, comments, checklists, and attachments. status/boardColumn enum: todo|in_progress|review|completed"
+    },
+    {
+      "name": "🧾 Invoices",
+      "item": [
+        {
+          "name": "Get Invoice Stats",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-workspace-slug",
+                "value": "{{workspaceSlug}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/invoices/stats",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "invoices", "stats"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "List Invoices",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-workspace-slug",
+                "value": "{{workspaceSlug}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/invoices?status=sent&page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "invoices"],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "sent",
+                  "disabled": true
+                },
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "disabled": true
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Invoice",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "x-workspace-slug",
+                "value": "{{workspaceSlug}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/invoices",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "invoices"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"client\": \"{{clientId}}\",\n  \"project\": \"{{projectId}}\",\n  \"type\": \"one_time\",\n  \"dueDate\": \"2026-08-15\",\n  \"currency\": \"USD\",\n  \"items\": [\n    {\n      \"description\": \"UX design sprint\",\n      \"quantity\": 1,\n      \"unitPrice\": 4000\n    },\n    {\n      \"description\": \"Frontend build\",\n      \"quantity\": 40,\n      \"unitPrice\": 75\n    }\n  ],\n  \"paymentTerms\": \"net30\",\n  \"discount\": 0\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Invoice By ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-workspace-slug",
+                "value": "{{workspaceSlug}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/invoices/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "invoices", ":id"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Invoice",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "x-workspace-slug",
+                "value": "{{workspaceSlug}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/invoices/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "invoices", ":id"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"notes\": \"Thank you for your business!\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Send Invoice",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "x-workspace-slug",
+                "value": "{{workspaceSlug}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/invoices/:id/send",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "invoices", ":id", "send"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Client Invoices",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-workspace-slug",
+                "value": "{{workspaceSlug}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/invoices/client/:clientId",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "invoices", "client", ":clientId"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Record Payment",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "x-workspace-slug",
+                "value": "{{workspaceSlug}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/invoices/:id/payments",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "invoices", ":id", "payments"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 4000,\n  \"method\": \"bank_transfer\",\n  \"date\": \"2026-07-20\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Download Invoice PDF",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-workspace-slug",
+                "value": "{{workspaceSlug}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/invoices/:id/download",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "invoices", ":id", "download"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Cancel Invoice",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "x-workspace-slug",
+                "value": "{{workspaceSlug}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/invoices/:id/cancel",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "invoices", ":id", "cancel"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Permanently Delete Invoice",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "x-workspace-slug",
+                "value": "{{workspaceSlug}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/invoices/:id/permanent",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "invoices", ":id", "permanent"]
+            }
+          },
+          "response": []
+        }
+      ],
+      "description": "Invoicing, payments, and PDF generation. status enum: draft|sent|paid|overdue|cancelled|refunded"
+    },
+    {
+      "name": "📊 Reports",
+      "item": [
+        {
+          "name": "Dashboard Stats",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-workspace-slug",
+                "value": "{{workspaceSlug}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/reports/dashboard",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "reports", "dashboard"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Employee Performance",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-workspace-slug",
+                "value": "{{workspaceSlug}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/reports/employee-performance?startDate=2026-01-01&endDate=2026-06-30",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "reports", "employee-performance"],
+              "query": [
+                {
+                  "key": "startDate",
+                  "value": "2026-01-01",
+                  "disabled": true
+                },
+                {
+                  "key": "endDate",
+                  "value": "2026-06-30",
+                  "disabled": true
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Project Progress",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-workspace-slug",
+                "value": "{{workspaceSlug}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/reports/project-progress",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "reports", "project-progress"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Task Completion",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-workspace-slug",
+                "value": "{{workspaceSlug}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/reports/task-completion",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "reports", "task-completion"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Revenue Summary",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-workspace-slug",
+                "value": "{{workspaceSlug}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/reports/revenue?startDate=2026-01-01&endDate=2026-06-30",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "reports", "revenue"],
+              "query": [
+                {
+                  "key": "startDate",
+                  "value": "2026-01-01",
+                  "disabled": true
+                },
+                {
+                  "key": "endDate",
+                  "value": "2026-06-30",
+                  "disabled": true
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Export Report",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "x-workspace-slug",
+                "value": "{{workspaceSlug}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/reports/export",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "reports", "export"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"report\": \"revenue\",\n  \"format\": \"pdf\",\n  \"startDate\": \"2026-01-01\",\n  \"endDate\": \"2026-06-30\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        }
+      ],
+      "description": "Dashboard analytics, performance, progress, and exportable reports."
+    },
+    {
+      "name": "🧑‍💼 Employees & Departments",
+      "item": [
+        {
+          "name": "List Employees",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-workspace-slug",
+                "value": "{{workspaceSlug}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/employees?status=active&page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "employees"],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "active",
+                  "disabled": true
+                },
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "disabled": true
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Employee",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "x-workspace-slug",
+                "value": "{{workspaceSlug}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/employees",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "employees"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user\": \"{{userId}}\",\n  \"department\": {\n    \"name\": \"Engineering\",\n    \"code\": \"ENG\"\n  },\n  \"position\": {\n    \"title\": \"Software Engineer\",\n    \"level\": \"mid\"\n  },\n  \"employmentType\": \"full_time\",\n  \"workInfo\": {\n    \"hireDate\": \"2026-01-15\",\n    \"salary\": {\n      \"amount\": 90000,\n      \"currency\": \"USD\",\n      \"type\": \"annual\"\n    }\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Employee By ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-workspace-slug",
+                "value": "{{workspaceSlug}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/employees/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "employees", ":id"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Employee",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "x-workspace-slug",
+                "value": "{{workspaceSlug}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/employees/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "employees", ":id"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"position\": {\n    \"title\": \"Senior Software Engineer\",\n    \"level\": \"senior\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Employee",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "x-workspace-slug",
+                "value": "{{workspaceSlug}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/employees/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "employees", ":id"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Attendance",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "x-workspace-slug",
+                "value": "{{workspaceSlug}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/employees/:id/attendance",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "employees", ":id", "attendance"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"present\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Terminate Employee",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "x-workspace-slug",
+                "value": "{{workspaceSlug}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/employees/:id/terminate",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "employees", ":id", "terminate"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"terminationReason\": \"Voluntary resignation\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Reactivate Employee",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "x-workspace-slug",
+                "value": "{{workspaceSlug}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/employees/:id/reactivate",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "employees", ":id", "reactivate"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Mark On Leave",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "x-workspace-slug",
+                "value": "{{workspaceSlug}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/employees/:id/leave",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "employees", ":id", "leave"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"leaveType\": \"annual\",\n  \"startDate\": \"2026-08-01\",\n  \"endDate\": \"2026-08-10\",\n  \"reason\": \"Vacation\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Return From Leave",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "x-workspace-slug",
+                "value": "{{workspaceSlug}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/employees/:id/return-from-leave",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "employees", ":id", "return-from-leave"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Leave History",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-workspace-slug",
+                "value": "{{workspaceSlug}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/employees/:id/leave-history",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "employees", ":id", "leave-history"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "List Departments",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-workspace-slug",
+                "value": "{{workspaceSlug}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/employees/departments",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "employees", "departments"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Department",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "x-workspace-slug",
+                "value": "{{workspaceSlug}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/employees/departments",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "employees", "departments"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Engineering\",\n  \"code\": \"ENG\",\n  \"manager\": \"{{userId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Department",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "x-workspace-slug",
+                "value": "{{workspaceSlug}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/employees/departments/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "employees", "departments", ":id"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Product Engineering\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Department",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "x-workspace-slug",
+                "value": "{{workspaceSlug}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/employees/departments/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "employees", "departments", ":id"]
+            }
+          },
+          "response": []
+        }
+      ],
+      "description": "HR: employee records, attendance, leave management, and department org structure."
+    },
+    {
+      "name": "🛡️ Permissions & Roles",
+      "item": [
+        {
+          "name": "Get All Permissions",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-workspace-slug",
+                "value": "{{workspaceSlug}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/permissions",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "permissions"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Roles",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-workspace-slug",
+                "value": "{{workspaceSlug}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/permissions/roles",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "permissions", "roles"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Assignable Roles",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-workspace-slug",
+                "value": "{{workspaceSlug}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/permissions/assignable-roles",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "permissions", "assignable-roles"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get User Permissions",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-workspace-slug",
+                "value": "{{workspaceSlug}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/permissions/users/:userId",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "permissions", "users", ":userId"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update User Permissions",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "x-workspace-slug",
+                "value": "{{workspaceSlug}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/permissions/users/:userId",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "permissions", "users", ":userId"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"role\": \"project_manager\",\n  \"permissions\": [\n    \"view_projects\",\n    \"create_projects\",\n    \"update_projects\",\n    \"assign_project_team\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        }
+      ],
+      "description": "Granular RBAC — view the permission catalog and manage per-user role/permission assignments."
+    },
+    {
+      "name": "🔔 Notifications",
+      "item": [
+        {
+          "name": "Send Real-Time Notification",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "x-workspace-slug",
+                "value": "{{workspaceSlug}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/notifications/send",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "notifications", "send"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"recipient\": \"{{userId}}\",\n  \"type\": \"task_assigned\",\n  \"title\": \"New task assigned\",\n  \"message\": \"You've been assigned to \\\"Set up CI/CD pipeline\\\".\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Notifications",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-workspace-slug",
+                "value": "{{workspaceSlug}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/notifications?page=1&limit=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "notifications"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "disabled": true
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Unread Count",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-workspace-slug",
+                "value": "{{workspaceSlug}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/notifications/unread-count",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "notifications", "unread-count"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Notification",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "x-workspace-slug",
+                "value": "{{workspaceSlug}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/notifications",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "notifications"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"recipient\": \"{{userId}}\",\n  \"type\": \"info\",\n  \"title\": \"Welcome!\",\n  \"message\": \"Your account has been set up successfully.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Mark All As Read",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "x-workspace-slug",
+                "value": "{{workspaceSlug}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/notifications/read-all",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "notifications", "read-all"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Mark As Read",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "x-workspace-slug",
+                "value": "{{workspaceSlug}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/notifications/:id/read",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "notifications", ":id", "read"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Archive Notification",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "x-workspace-slug",
+                "value": "{{workspaceSlug}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/notifications/:id/archive",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "notifications", ":id", "archive"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Notification Settings",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-workspace-slug",
+                "value": "{{workspaceSlug}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/notifications/settings",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "notifications", "settings"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Notification Settings",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "x-workspace-slug",
+                "value": "{{workspaceSlug}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/notifications/settings",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "notifications", "settings"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": true,\n  \"push\": true,\n  \"desktop\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        }
+      ],
+      "description": "In-app notifications, unread counts, and delivery preferences."
+    },
+    {
+      "name": "💬 Chat",
+      "item": [
+        {
+          "name": "Get Chat Messages",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-workspace-slug",
+                "value": "{{workspaceSlug}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/chat/:roomId?page=1&limit=50",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "chat", ":roomId"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": "50",
+                  "disabled": true
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Send Chat Message",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "x-workspace-slug",
+                "value": "{{workspaceSlug}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/chat/:roomId",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "chat", ":roomId"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"message\": \"Standup in 5 minutes!\",\n  \"type\": \"text\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Edit Chat Message",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "x-workspace-slug",
+                "value": "{{workspaceSlug}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/chat/:messageId",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "chat", ":messageId"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"message\": \"Standup in 10 minutes!\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Chat Message",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "x-workspace-slug",
+                "value": "{{workspaceSlug}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/chat/:messageId",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "chat", ":messageId"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Clear Room History",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "x-workspace-slug",
+                "value": "{{workspaceSlug}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/chat/:roomId/clear",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "chat", ":roomId", "clear"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Add Reaction",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "x-workspace-slug",
+                "value": "{{workspaceSlug}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/chat/:messageId/reaction",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "chat", ":messageId", "reaction"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"emoji\": \"\\ud83d\\udc4d\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        }
+      ],
+      "description": "Team chat, threaded via roomId, with reactions and edit/delete."
+    },
+    {
+      "name": "📎 File Upload",
+      "item": [
+        {
+          "name": "Upload Single File",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "x-workspace-slug",
+                "value": "{{workspaceSlug}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/upload",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "upload"]
+            },
+            "description": "multipart/form-data. Max 10MB. Backed by Cloudinary.",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": ""
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Upload Multiple Files",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "x-workspace-slug",
+                "value": "{{workspaceSlug}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/upload/multiple",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "upload", "multiple"]
+            },
+            "description": "Up to 5 files per request.",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "files",
+                  "type": "file",
+                  "src": ""
+                },
+                {
+                  "key": "files",
+                  "type": "file",
+                  "src": ""
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete File",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/upload/:publicId",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "upload", ":publicId"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get File Info",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/upload/:publicId/info",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "upload", ":publicId", "info"]
+            }
+          },
+          "response": []
+        }
+      ],
+      "description": "Cloudinary-backed file upload, deletion, and metadata lookup. Max 10MB/file, 5 files/request."
+    },
+    {
+      "name": "🧭 Platform Super Admin",
+      "item": [
+        {
+          "name": "Platform Analytics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/super-admin/analytics",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "super-admin", "analytics"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "List All Workspaces",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/super-admin/workspaces?page=1&limit=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "super-admin", "workspaces"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "disabled": true
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Workspace By ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/super-admin/workspaces/:workspaceId",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "super-admin", "workspaces", ":workspaceId"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Approve Workspace",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/super-admin/workspaces/:workspaceId/approve",
+              "host": ["{{baseUrl}}"],
+              "path": [
+                "api",
+                "super-admin",
+                "workspaces",
+                ":workspaceId",
+                "approve"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Suspend Workspace",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/super-admin/workspaces/:workspaceId/suspend",
+              "host": ["{{baseUrl}}"],
+              "path": [
+                "api",
+                "super-admin",
+                "workspaces",
+                ":workspaceId",
+                "suspend"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Payment failure\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Reactivate Workspace",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/super-admin/workspaces/:workspaceId/reactivate",
+              "host": ["{{baseUrl}}"],
+              "path": [
+                "api",
+                "super-admin",
+                "workspaces",
+                ":workspaceId",
+                "reactivate"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Workspace Plan",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/super-admin/workspaces/:workspaceId/plan",
+              "host": ["{{baseUrl}}"],
+              "path": [
+                "api",
+                "super-admin",
+                "workspaces",
+                ":workspaceId",
+                "plan"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"plan\": \"professional\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Permanently Delete Workspace",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/super-admin/workspaces/:workspaceId",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "super-admin", "workspaces", ":workspaceId"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "List All Users (Platform-Wide)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/super-admin/users?page=1&limit=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "super-admin", "users"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "disabled": true
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Platform Settings",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/super-admin/settings",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "super-admin", "settings"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Platform Settings",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/super-admin/settings",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "super-admin", "settings"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"maintenanceMode\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Security Logs",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/super-admin/logs?page=1&limit=50",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "super-admin", "logs"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": "50",
+                  "disabled": true
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Active Announcements",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/super-admin/announcements/active",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "super-admin", "announcements", "active"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "List Announcements",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/super-admin/announcements",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "super-admin", "announcements"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Announcement",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/super-admin/announcements",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "super-admin", "announcements"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Scheduled Maintenance\",\n  \"message\": \"The platform will be briefly unavailable on Aug 1st at 02:00 UTC.\",\n  \"type\": \"warning\",\n  \"targetAudience\": \"all\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Announcement",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/super-admin/announcements/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "super-admin", "announcements", ":id"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"isPinned\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Announcement",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/super-admin/announcements/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "super-admin", "announcements", ":id"]
+            }
+          },
+          "response": []
+        }
+      ],
+      "description": "Cross-tenant platform administration. Requires the super_admin role."
+    },
+    {
+      "name": "❤️ Health & Docs",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/health",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "health"]
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "API Self-Documentation",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/docs",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "docs"]
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "response": []
+        }
+      ],
+      "description": "Service health check and the API's built-in machine-readable route map."
+    }
+  ]
+}
