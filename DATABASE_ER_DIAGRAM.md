@@ -484,5 +484,4 @@ Every workspace-scoped collection above carries a `workspace: ObjectId` field, a
 <div align="center">
 <img src="https://capsule-render.vercel.app/api?type=waving&color=0:2563eb,100:0f172a&height=120&section=footer" width="100%"/>
 
-Diagrams generated directly from the live Mongoose schemas — if the code changes, so should this file.
 </div>
