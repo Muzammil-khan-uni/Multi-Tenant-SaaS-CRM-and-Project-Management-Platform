@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="https://capsule-render.vercel.app/api?type=waving&color=0:0f172a,50:1e3a8a,100:2563eb&height=200&section=header&text=API%20Reference&fontSize=60&fontColor=ffffff&animation=fadeIn&fontAlignY=38&desc=NexusCRM%20%E2%80%94%20Multi-Tenant%20SaaS%20CRM%20%2B%20Project%20Management%20API&descAlignY=58&descSize=18" width="100%"/>
+<img src="https://capsule-render.vercel.app/api?type=waving&color=0:0f172a,50:1e3a8a,100:2563eb&height=200&section=header&text=API%20Reference&fontSize=60&fontColor=ffffff&animation=fadeIn&fontAlignY=38&desc=SaaS-CRM-Platform%20%E2%80%94%20Multi-Tenant%20SaaS%20CRM%20%2B%20Project%20Management%20API&descAlignY=58&descSize=18" width="100%"/>
 
 <a href="#">
   <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=20&duration=2800&pause=900&color=2563EB&center=true&vCenter=true&width=760&lines=RESTful+%2B+JSON+%2B+JWT+%2B+WebSockets;Every+request+is+tenant-scoped+by+default;Consistent+envelopes.+Predictable+errors.;Built+for+humans+and+machines+alike." alt="Typing SVG" />
@@ -74,7 +74,7 @@ curl -X GET "http://localhost:5000/api/clients" \
 
 ## 🔑 Authentication
 
-NexusCRM uses **JWT access + refresh token** authentication. Access tokens are short-lived; refresh tokens rotate sessions without forcing re-login.
+SaaS-CRM-Platform uses **JWT access + refresh token** authentication. Access tokens are short-lived; refresh tokens rotate sessions without forcing re-login.
 
 ```mermaid
 sequenceDiagram
