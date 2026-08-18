@@ -5,7 +5,6 @@ import {
   Phone,
   MapPin,
   Briefcase,
-  Building2,
   Calendar,
   Pencil,
   KeyRound,
@@ -378,81 +377,79 @@ const Profile = () => {
           padding={false}
           className="overflow-hidden border-0 shadow-xl shadow-primary-500/10 dark:shadow-primary-500/5"
         >
-          {/* Animated gradient background */}
-          <div className="relative h-28 sm:h-36 md:h-44 lg:h-48">
-            <div className="absolute inset-0 bg-gradient-to-br from-primary-600 via-violet-600 to-indigo-600">
-              <div className="absolute inset-0 opacity-30">
-                <div className="absolute top-0 -left-4 w-72 h-72 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl animate-pulse" />
-                <div className="absolute top-0 -right-4 w-72 h-72 bg-yellow-500 rounded-full mix-blend-multiply filter blur-3xl animate-pulse animation-delay-2000" />
-                <div className="absolute -bottom-8 left-20 w-72 h-72 bg-pink-500 rounded-full mix-blend-multiply filter blur-3xl animate-pulse animation-delay-4000" />
-              </div>
-              <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-white/10 via-transparent to-transparent" />
-            </div>
-          </div>
+          <div className="relative bg-gradient-to-br from-primary-600 via-violet-600 to-indigo-600">
+            {/* Signature accent line */}
+            <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-white/60 via-white/20 to-transparent" />
 
-          <div className="relative px-4 sm:px-6 lg:px-8 pb-6 sm:pb-8 -mt-12 sm:-mt-16 md:-mt-20">
-            <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 sm:gap-6">
-              {/* Avatar and Name Section */}
-              <motion.div
-                className="flex flex-col sm:flex-row items-center sm:items-end gap-4 sm:gap-5 text-center sm:text-left flex-1 min-w-0"
-                variants={scaleIn}
-              >
-                <div className="relative flex-shrink-0">
-                  <Avatar
-                    src={user?.avatar?.url}
-                    name={fullName}
-                    size="2xl"
-                    className="ring-[3px] sm:ring-4 ring-white dark:ring-gray-800 shadow-2xl w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 lg:w-32 lg:h-32"
-                  />
-                  <motion.div
-                    className="absolute -bottom-1 -right-1 bg-emerald-500 rounded-full p-1 ring-2 ring-white dark:ring-gray-800"
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    transition={{
-                      delay: 0.3,
-                      type: 'spring',
-                      stiffness: 260,
-                      damping: 20,
-                    }}
-                  >
-                    <CheckCircle2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white" />
-                  </motion.div>
-                </div>
+            {/* Fine dot-grid texture — quiet, replaces the old blurred blobs */}
+            <div
+              className="absolute inset-0 opacity-[0.08] pointer-events-none"
+              style={{
+                backgroundImage:
+                  'radial-gradient(circle, #ffffff 1px, transparent 1px)',
+                backgroundSize: '20px 20px',
+              }}
+            />
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_rgba(255,255,255,0.12),_transparent_55%)] pointer-events-none" />
 
-                <div className="pb-1 sm:pb-2 min-w-0 flex-1">
-                  <motion.h1
-                    className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white truncate bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent"
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.2 }}
-                  >
-                    {fullName || 'Your Profile'}
-                  </motion.h1>
-                  <div className="flex flex-wrap items-center justify-center sm:justify-start gap-x-3 sm:gap-x-4 gap-y-1.5 mt-1.5 sm:mt-2">
-                    {user?.position && (
-                      <motion.span
-                        className="flex items-center gap-1.5 text-xs sm:text-sm text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 px-2.5 sm:px-3 py-1 rounded-full"
-                        whileHover={{ scale: 1.05 }}
+            <div className="relative px-5 sm:px-8 lg:px-10 pt-8 sm:pt-10 pb-6 sm:pb-7">
+              {/* Identity row */}
+              <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
+                <motion.div
+                  className="flex flex-col sm:flex-row items-center sm:items-end gap-4 sm:gap-5 text-center sm:text-left min-w-0"
+                  variants={scaleIn}
+                >
+                  <div className="relative flex-shrink-0">
+                    <Avatar
+                      src={user?.avatar?.url}
+                      name={fullName}
+                      size="2xl"
+                      className="ring-[3px] sm:ring-4 ring-white/90 shadow-2xl w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28"
+                    />
+                    <motion.div
+                      className="absolute -bottom-1 -right-1 bg-emerald-500 rounded-full p-1 ring-2 ring-white"
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      transition={{
+                        delay: 0.3,
+                        type: 'spring',
+                        stiffness: 260,
+                        damping: 20,
+                      }}
+                    >
+                      <CheckCircle2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white" />
+                    </motion.div>
+                  </div>
+
+                  <div className="min-w-0">
+                    {/* Eyebrow */}
+                    {(user?.position || user?.department) && (
+                      <motion.p
+                        className="flex items-center justify-center sm:justify-start gap-1.5 text-[10px] sm:text-xs font-semibold uppercase tracking-[0.14em] text-white/75 mb-1"
+                        initial={{ opacity: 0, y: -6 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.15 }}
                       >
-                        <Briefcase className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
-                        <span className="truncate max-w-[120px] sm:max-w-[200px]">
-                          {user.position}
+                        <Briefcase className="w-3 h-3" />
+                        <span className="truncate max-w-[220px]">
+                          {[user?.position, user?.department]
+                            .filter(Boolean)
+                            .join(' · ')}
                         </span>
-                      </motion.span>
+                      </motion.p>
                     )}
-                    {user?.department && (
-                      <motion.span
-                        className="flex items-center gap-1.5 text-xs sm:text-sm text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 px-2.5 sm:px-3 py-1 rounded-full"
-                        whileHover={{ scale: 1.05 }}
-                      >
-                        <Building2 className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
-                        <span className="truncate max-w-[120px] sm:max-w-[200px]">
-                          {user.department}
-                        </span>
-                      </motion.span>
-                    )}
-                    {currentRole && (
-                      <motion.div whileHover={{ scale: 1.05 }}>
+
+                    <motion.h1
+                      className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-white truncate"
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.2 }}
+                    >
+                      {fullName || 'Your Profile'}
+                    </motion.h1>
+
+                    <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 mt-2.5">
+                      {currentRole && (
                         <Badge
                           variant={ROLE_BADGE_VARIANT[currentRole] || 'default'}
                           size="sm"
@@ -460,36 +457,90 @@ const Profile = () => {
                         >
                           {currentRole.replace('_', ' ')}
                         </Badge>
-                      </motion.div>
-                    )}
+                      )}
+                      <span
+                        className={`inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full border ${
+                          user?.isEmailVerified
+                            ? 'text-white border-white/30 bg-white/15'
+                            : 'text-amber-100 border-amber-200/40 bg-amber-400/20'
+                        }`}
+                      >
+                        <ShieldCheck className="w-3 h-3" />
+                        {user?.isEmailVerified ? 'Verified' : 'Unverified'}
+                      </span>
+                      <span className="inline-flex items-center gap-1.5 text-xs font-medium text-white/70 px-2.5 py-1">
+                        <Calendar className="w-3 h-3" />
+                        Since{' '}
+                        {formatDate(user?.createdAt, {
+                          year: 'numeric',
+                          month: 'short',
+                        })}
+                      </span>
+                    </div>
                   </div>
-                </div>
-              </motion.div>
+                </motion.div>
 
-              {/* Action Buttons */}
+                {/* Actions */}
+                <motion.div
+                  className="flex flex-row items-stretch gap-2 sm:gap-2.5 w-full lg:w-auto flex-shrink-0"
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.3 }}
+                >
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    icon={KeyRound}
+                    onClick={() => setShowPasswordModal(true)}
+                    className="w-full sm:w-auto justify-center text-xs sm:text-sm !border-white/30 !text-white hover:!bg-white/10 !bg-transparent"
+                  >
+                    Change Password
+                  </Button>
+                  <Button
+                    size="sm"
+                    icon={Pencil}
+                    onClick={() => setShowEditModal(true)}
+                    className="w-full sm:w-auto justify-center bg-white !text-primary-700 hover:!bg-white/90 shadow-lg shadow-black/10 text-xs sm:text-sm"
+                  >
+                    Edit Profile
+                  </Button>
+                </motion.div>
+              </div>
+
+              {/* Vitals strip — real numbers, not decoration */}
               <motion.div
-                className="flex flex-row sm:flex-col lg:flex-row items-stretch sm:items-end gap-2 sm:gap-2.5 w-full sm:w-auto"
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.3 }}
+                className="mt-7 sm:mt-8 grid grid-cols-2 sm:grid-cols-4 rounded-xl overflow-hidden border border-white/15 bg-white/10 backdrop-blur-sm divide-x divide-y sm:divide-y-0 divide-white/15"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.35 }}
               >
-                <Button
-                  variant="outline"
-                  size="sm"
-                  icon={KeyRound}
-                  onClick={() => setShowPasswordModal(true)}
-                  className="w-full sm:w-auto justify-center hover:shadow-md transition-shadow text-xs sm:text-sm"
-                >
-                  <span className=" sm:inline">Change Password</span>
-                </Button>
-                <Button
-                  size="sm"
-                  icon={Pencil}
-                  onClick={() => setShowEditModal(true)}
-                  className="w-full sm:w-auto justify-center bg-gradient-to-r from-primary-600 to-indigo-600 hover:from-primary-700 hover:to-indigo-700 shadow-lg shadow-primary-500/25 hover:shadow-xl hover:shadow-primary-500/30 transition-all text-xs sm:text-sm"
-                >
-                  Edit Profile
-                </Button>
+                <HeaderVital
+                  icon={CheckCircle2}
+                  iconColor="text-white"
+                  label="Tasks"
+                  value={taskStats.total}
+                  sub={`${taskStats.completed} done`}
+                />
+                <HeaderVital
+                  icon={FolderKanban}
+                  iconColor="text-white"
+                  label="Projects"
+                  value={projectStats.total}
+                  sub={`${projectStats.avgProgress}% avg`}
+                />
+                <HeaderVital
+                  icon={Users}
+                  iconColor="text-white"
+                  label="Workspaces"
+                  value={workspaces.length}
+                />
+                <HeaderVital
+                  icon={Sparkles}
+                  iconColor="text-white"
+                  label="Profile"
+                  value={`${profileCompleteness}%`}
+                  sub="complete"
+                />
               </motion.div>
             </div>
           </div>
@@ -1139,6 +1190,29 @@ const Profile = () => {
     </div>
   );
 };
+
+const HeaderVital = ({ icon: Icon, iconColor, label, value, sub }) => (
+  <div className="flex items-center gap-2.5 sm:gap-3 px-4 sm:px-5 py-3.5 sm:py-4">
+    <Icon
+      className={`w-4 h-4 sm:w-[18px] sm:h-[18px] flex-shrink-0 ${iconColor}`}
+    />
+    <div className="min-w-0">
+      <div className="flex items-baseline gap-1.5">
+        <span className="text-base sm:text-lg font-bold text-white leading-none">
+          {value}
+        </span>
+        {sub && (
+          <span className="text-[10px] sm:text-xs text-white/70 truncate">
+            {sub}
+          </span>
+        )}
+      </div>
+      <p className="text-[10px] sm:text-xs text-white/70 uppercase tracking-wide mt-0.5">
+        {label}
+      </p>
+    </div>
+  </div>
+);
 
 const StatPill = ({ icon: Icon, iconColor, bgColor, label, value }) => (
   <motion.div
