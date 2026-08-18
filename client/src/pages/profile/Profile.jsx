@@ -1191,6 +1191,7 @@ const Profile = () => {
   );
 };
 
+
 const HeaderVital = ({ icon: Icon, iconColor, label, value, sub }) => (
   <div className="flex items-center gap-2.5 sm:gap-3 px-4 sm:px-5 py-3.5 sm:py-4">
     <Icon
